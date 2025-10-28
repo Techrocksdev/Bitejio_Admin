@@ -1,12 +1,13 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { showGlobalAlert } from "../commonComponents/useGlobalAlert";
-import { addMerchant } from "../apiServices/home/homeHttpService";
+import { addMerchant, editUser } from "../apiServices/home/homeHttpService";
 import { RotatingLines } from "react-loader-spinner";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 
-function AddMerchant() {
+// eslint-disable-next-line no-unused-vars
+function AddMerchant({ details, setDetails, refetch }) {
   const {
     register,
     handleSubmit,
@@ -14,12 +15,45 @@ function AddMerchant() {
     formState: { errors },
     reset,
     watch,
+    trigger,
+    setValue,
   } = useForm({
     mode: "onChange",
   });
 
   const [loader, setLoader] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const passwordValue = watch("password");
+  const confirmPasswordValue = watch("confirmPassword");
+
+  useEffect(() => {
+    if (confirmPasswordValue && passwordValue) {
+      trigger("confirmPassword");
+    }
+  }, [passwordValue, confirmPasswordValue, trigger]);
+
+  useEffect(() => {
+    if (details?.firstName) {
+      setValue("firstName", details?.firstName);
+      setValue("lastName", details?.lastName);
+      setValue("userName", details?.userName);
+      setValue("shopName", details?.shopName);
+      setValue("email", details?.email);
+      if (details?.phoneNumber) {
+        const phoneNumber = details?.phoneNumber.replace(/^\+/, "");
+        const countryCode = `${details?.countryCode}`;
+
+        setValue("phoneNumber", {
+          phoneNumber: phoneNumber,
+          countryCode: countryCode,
+        });
+      }
+      setValue("status", details?.status);
+    } else {
+      reset();
+    }
+  }, [details]);
 
   const onSubmit = async (data) => {
     setLoader(true);
@@ -28,10 +62,15 @@ function AddMerchant() {
     delete data.confirmPassword;
 
     try {
-      const response = await addMerchant(data);
+      const response = (await details?.firstName)
+        ? editUser(details._id, data)
+        : addMerchant(data);
       if (!response.error) {
         showGlobalAlert(response.message, "success");
         document.getElementById("closeAddMerchantModal").click();
+        setTimeout(() => {
+          refetch();
+        }, 500);
       } else {
         showGlobalAlert(response.message, "error");
       }
@@ -43,21 +82,27 @@ function AddMerchant() {
     }
   };
 
-  // eslint-disable-next-line no-unused-vars
   const togglePasswordVisibility = () => setShowPassword(!showPassword);
+  const toggleConfirmPasswordVisibility = () =>
+    setShowConfirmPassword(!showConfirmPassword);
 
   return (
     <>
       <div className="modal-content">
         <div className="modal-header">
-          <h5 className="modal-title text-main fw-bold">Add New Merchant</h5>
+          <h5 className="modal-title text-main fw-bold">
+            {details?.firstName ? "Edit" : "Add"} Merchant
+          </h5>
           <button
             type="button"
             className="btn-close"
             data-bs-dismiss="modal"
             aria-label="Close"
             id="closeAddMerchantModal"
-            onClick={() => reset()}
+            onClick={() => {
+              reset();
+              setDetails({});
+            }}
           />
         </div>
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -170,6 +215,7 @@ function AddMerchant() {
                     message: "Invalid email address",
                   },
                 })}
+                readOnly={details?.firstName ? true : false}
               />
               {errors.email && (
                 <p className="form-error">{errors.email.message}</p>
@@ -270,17 +316,12 @@ function AddMerchant() {
                     },
                   })}
                 />
-                {/* <span
-                    className="position-absolute top-50 end-0 translate-middle-y me-2"
-                    style={{ cursor: "pointer", zIndex: 10 }}
-                    onClick={togglePasswordVisibility}
-                  >
-                    <img
-                      src="/assets/images/icons/eye-slash.svg"
-                      alt="Toggle password visibility"
-                      width="20"
-                    />
-                  </span> */}
+                <i
+                  className={`fa pass-eye ${
+                    showPassword ? "fa-eye-slash" : "fa-eye"
+                  }`}
+                  onClick={togglePasswordVisibility}
+                ></i>
               </div>
               {errors.password && (
                 <p className="form-error">{errors.password.message}</p>
@@ -291,18 +332,26 @@ function AddMerchant() {
               <label className="form-label fw-semibold">
                 Confirm Password <span className="text-danger">*</span>
               </label>
-              <input
-                type="password"
-                className={`form-control ${
-                  errors.confirmPassword ? "input-error" : ""
-                }`}
-                placeholder="Confirm password"
-                {...register("confirmPassword", {
-                  required: "Please confirm your password",
-                  validate: (value) =>
-                    value === watch("password") || "Passwords do not match",
-                })}
-              />
+              <div className="position-relative">
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  className={`form-control ${
+                    errors.confirmPassword ? "input-error" : ""
+                  }`}
+                  placeholder="Confirm password"
+                  {...register("confirmPassword", {
+                    required: "Please confirm your password",
+                    validate: (value) =>
+                      value === watch("password") || "Passwords do not match",
+                  })}
+                />
+                <i
+                  className={`fa pass-eye ${
+                    showConfirmPassword ? "fa-eye-slash" : "fa-eye"
+                  }`}
+                  onClick={toggleConfirmPasswordVisibility}
+                ></i>
+              </div>
               {errors.confirmPassword && (
                 <p className="form-error">{errors.confirmPassword.message}</p>
               )}
@@ -314,7 +363,7 @@ function AddMerchant() {
                 <input
                   className="form-check-input"
                   type="checkbox"
-                  defaultChecked
+                  defaultChecked={details?.firstName ? "" : true}
                   {...register("status")}
                 />
               </div>
@@ -327,7 +376,7 @@ function AddMerchant() {
               disabled={loader}
             >
               {loader ? (
-                <div>
+                <>
                   <span className="me-2">Saving...</span>
                   <RotatingLines
                     strokeColor="white"
@@ -336,7 +385,9 @@ function AddMerchant() {
                     width="20"
                     visible={true}
                   />
-                </div>
+                </>
+              ) : details?.firstName ? (
+                "Edit Merchant"
               ) : (
                 "Save Merchant"
               )}

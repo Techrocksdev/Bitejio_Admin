@@ -1,25 +1,39 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import SideBar from "../commonComponents/sideBar";
 import Header from "../commonComponents/header";
 import { useUserAuth } from "../commonComponents/authContext";
 import AddMerchant from "./addMerchant";
 import { useQuery } from "@tanstack/react-query";
-import { getUsers } from "../apiServices/home/homeHttpService";
+import {
+  changeUserStatus,
+  deleteUser,
+  getUsers,
+} from "../apiServices/home/homeHttpService";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
+import { showGlobalAlert } from "../commonComponents/useGlobalAlert";
+import { Link } from "react-router-dom";
 
 function Merchants() {
   const { isSidebarHidden } = useUserAuth();
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setpageSize] = useState(10);
+  const [details, setDetails] = useState({});
+  const [delId, setDelId] = useState("");
 
-  const { data: response, isLoading } = useQuery({
+  useEffect(() => {}, [details]);
+
+  const {
+    data: response,
+    isLoading,
+    refetch,
+  } = useQuery({
     queryKey: ["merchantList", currentPage, pageSize],
     queryFn: async () => {
       const formData = {
         page: currentPage,
         pageSize: pageSize,
-        userType: "User",
+        userType: "Merchant",
         search: "",
         from: "",
         to: "",
@@ -32,12 +46,42 @@ function Merchants() {
     },
   });
 
-  const results = response?.results?.merchants || [];
+  const results = response?.results?.data || [];
   const totalPages = Math.ceil(response?.results?.totalPages);
 
   const handlePageChange = (newPage) => {
     if (newPage > 0 && newPage <= totalPages) {
       setCurrentPage(newPage);
+    }
+  };
+
+  const changeStatus = async (id) => {
+    try {
+      const response = await changeUserStatus(id);
+      if (!response.error) {
+        showGlobalAlert(response.message, "success");
+        refetch();
+      } else {
+        showGlobalAlert(response.message, "error");
+      }
+      // eslint-disable-next-line no-unused-vars
+    } catch (error) {
+      console.log("An error occurred");
+    }
+  };
+  const deleteMerchant = async (id) => {
+    try {
+      const response = await deleteUser(id);
+      if (!response.error) {
+        showGlobalAlert(response.message, "success");
+        document.getElementById("close").click();
+        refetch();
+      } else {
+        showGlobalAlert(response.message, "error");
+      }
+      // eslint-disable-next-line no-unused-vars
+    } catch (error) {
+      console.log("An error occurred");
     }
   };
 
@@ -113,17 +157,18 @@ function Merchants() {
                     ) : results?.length ? (
                       results?.map((item, index) => (
                         <tr>
-                          <td>1</td>
-                          <td>Aryan</td>
-                          <td>Saini</td>
-                          <td>aryan123</td>
-                          <td>Aryan Foods</td>
+                          <td>{index + 1}</td>
+                          <td>{item.firstName}</td>
+                          <td>{item.lastName}</td>
+                          <td>{item.userName}</td>
+                          <td>{item.shopName}</td>
                           <td>
                             <div className="form-check form-switch">
                               <input
                                 className="form-check-input"
                                 type="checkbox"
-                                defaultChecked
+                                checked={item.status}
+                                onChange={() => changeStatus(item._id)}
                               />
                             </div>
                           </td>
@@ -132,17 +177,27 @@ function Merchants() {
                               className="table-btn bg-main me-2"
                               data-bs-toggle="modal"
                               data-bs-target="#viewMerchantModal"
+                              onClick={() => setDetails(item)}
                             >
                               <i className="fa fa-eye" />
                             </button>
                             <button
                               className="table-btn bg-main me-2"
                               data-bs-toggle="modal"
-                              data-bs-target="#editMerchantModal"
+                              data-bs-target="#addMerchantModal"
+                              onClick={() => setDetails(item)}
                             >
                               <i className="fa fa-edit" />
                             </button>
-                            <button className="table-btn bg-danger">
+                            <button
+                              className="table-btn bg-danger"
+                              data-bs-toggle="modal"
+                              data-bs-target="#delete"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setDelId(item._id);
+                              }}
+                            >
                               <i className="fa fa-trash" />
                             </button>
                           </td>
@@ -264,6 +319,7 @@ function Merchants() {
         id="viewMerchantModal"
         tabIndex={-1}
         aria-hidden="true"
+        data-bs-backdrop="static"
       >
         <div className="modal-dialog modal-dialog-centered">
           <div className="modal-content">
@@ -275,110 +331,46 @@ function Merchants() {
                 type="button"
                 className="btn-close"
                 data-bs-dismiss="modal"
+                onClick={() => setDetails({})}
               />
             </div>
             <div className="modal-body">
               <p>
-                <strong>First Name:</strong> Aryan
+                <strong>First Name:</strong> {details?.firstName}
               </p>
               <p>
-                <strong>Last Name:</strong> Saini
+                <strong>Last Name:</strong> {details?.lastName}
               </p>
               <p>
-                <strong>Username:</strong> aryan123
+                <strong>Username:</strong> {details?.userName}
               </p>
               <p>
-                <strong>Shop Name:</strong> Aryan Foods
+                <strong>Email:</strong> {details?.email}
               </p>
               <p>
-                <strong>Status:</strong> Active
+                <strong>Shop Name:</strong> {details?.shopName}
+              </p>
+              <p>
+                <strong> Phone Number:</strong> {details?.phoneNumber}
+              </p>
+              <p>
+                <strong>Status:</strong>{" "}
+                {details?.status ? "Active" : "Inactive"}
               </p>
             </div>
             <div className="modal-footer">
-              <button className="btn comman-btn-main" data-bs-dismiss="modal">
+              <button
+                className="btn comman-btn-main"
+                data-bs-dismiss="modal"
+                onClick={() => setDetails({})}
+              >
                 Close
               </button>
             </div>
           </div>
         </div>
       </div>
-      {/* Edit Merchant Modal */}
-      <div
-        className="modal fade"
-        id="editMerchantModal"
-        tabIndex={-1}
-        aria-hidden="true"
-      >
-        <div className="modal-dialog modal-dialog-centered modal-lg">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title text-main fw-bold">Edit Merchant</h5>
-              <button
-                type="button"
-                className="btn-close"
-                data-bs-dismiss="modal"
-              />
-            </div>
-            <form>
-              <div className="modal-body row g-3">
-                <div className="col-md-6">
-                  <label className="form-label fw-semibold">First Name</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    defaultValue="Aryan"
-                  />
-                </div>
-                <div className="col-md-6">
-                  <label className="form-label fw-semibold">Last Name</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    defaultValue="Saini"
-                  />
-                </div>
-                <div className="col-md-6">
-                  <label className="form-label fw-semibold">Username</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    defaultValue="aryan123"
-                  />
-                </div>
-                <div className="col-md-6">
-                  <label className="form-label fw-semibold">Password</label>
-                  <input
-                    type="password"
-                    className="form-control"
-                    placeholder="Change password"
-                  />
-                </div>
-                <div className="col-md-6">
-                  <label className="form-label fw-semibold">Shop Name</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    defaultValue="Aryan Foods"
-                  />
-                </div>
-                <div className="col-md-6 d-flex align-items-center">
-                  <label className="form-label fw-semibold me-3">Status</label>
-                  <div className="form-check form-switch">
-                    <input
-                      className="form-check-input"
-                      type="checkbox"
-                      defaultChecked
-                    />
-                  </div>
-                </div>
-              </div>
-              <div className="modal-footer">
-                <button className="btn comman-btn-main">Save Changes</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
+
       {/* Add Merchant Modal */}
 
       <div
@@ -386,9 +378,55 @@ function Merchants() {
         id="addMerchantModal"
         tabIndex={-1}
         aria-hidden="true"
+        data-bs-backdrop="static"
       >
         <div className="modal-dialog modal-dialog-centered modal-lg">
-          <AddMerchant />
+          <AddMerchant
+            details={details}
+            setDetails={setDetails}
+            refetch={refetch}
+          />
+        </div>
+      </div>
+      <div
+        className="modal fade logoutmodal"
+        id="delete"
+        tabIndex={-1}
+        aria-labelledby="exampleModalLabel"
+        aria-hidden="true"
+      >
+        <div className="modal-dialog modal-dialog-centered">
+          <div className="modal-content">
+            <div className="modal-body">
+              <div className="paymentmodal_main text-center">
+                <div className="payment_head mb-3 mt-1">
+                  <h2>Confirmation</h2>
+                  <p>Are you sure you want to delete this user?</p>
+                </div>
+                <div className="row justify-content-center mb-2">
+                  <div className="col-auto">
+                    <button
+                      className="comman-btn-main"
+                      onClick={() => deleteMerchant(delId)}
+                    >
+                      Yes
+                    </button>
+                  </div>
+                  <div className="col-auto">
+                    <Link
+                      className="comman-btn-main white"
+                      data-bs-dismiss="modal"
+                      to=""
+                      onClick={() => setDelId("")}
+                      id="close"
+                    >
+                      No
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </>

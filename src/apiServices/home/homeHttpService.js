@@ -87,10 +87,10 @@ export async function getUsers(formData) {
   }
 }
 
-export async function changePassword(formData) {
+export async function editUser(id, formData) {
   try {
-    const { data } = await webHttpService.post(
-      `${import.meta.env.VITE_APIENDPOINT}/user/changePassword`,
+    const { data } = await webHttpService.put(
+      `${import.meta.env.VITE_APIENDPOINT}/user/editUser/${id}`,
       formData
     );
     console.log(data);
@@ -101,24 +101,10 @@ export async function changePassword(formData) {
   }
 }
 
-export async function editUserProfile(formData) {
-  try {
-    const { data } = await webHttpService.post(
-      `${import.meta.env.VITE_APIENDPOINT}/user/editUserProfile`,
-      formData
-    );
-    console.log(data);
-
-    return data;
-  } catch (error) {
-    showGlobalAlert(error.message, "error");
-  }
-}
-
-export async function getMyProfile() {
+export async function changeUserStatus(id) {
   try {
     const { data } = await webHttpService.get(
-      `${import.meta.env.VITE_APIENDPOINT}/user/getMyProfile`
+      `${import.meta.env.VITE_APIENDPOINT}/user/changeUserStatus/${id}`
     );
     console.log(data);
 
@@ -128,38 +114,10 @@ export async function getMyProfile() {
   }
 }
 
-export async function getDashboardCounts() {
+export async function deleteUser(id) {
   try {
-    const { data } = await webHttpService.post(
-      `${import.meta.env.VITE_APIENDPOINT}/analytics/getDashboardCounts`
-    );
-    console.log(data);
-
-    return data;
-  } catch (error) {
-    showGlobalAlert(error.message, "error");
-  }
-}
-
-export async function getContent(formData) {
-  try {
-    const { data } = await webHttpService.post(
-      `${import.meta.env.VITE_APIENDPOINT}/content/getContent`,
-      formData
-    );
-    console.log(data);
-
-    return data;
-  } catch (error) {
-    showGlobalAlert(error.message, "error");
-  }
-}
-
-export async function addCategory(formData) {
-  try {
-    const { data } = await webHttpService.post(
-      `${import.meta.env.VITE_APIENDPOINT}/products/addCategory`,
-      formData
+    const { data } = await webHttpService.delete(
+      `${import.meta.env.VITE_APIENDPOINT}/user/deleteUser/${id}`
     );
     console.log(data);
 
@@ -171,7 +129,7 @@ export async function addCategory(formData) {
 
 export async function getCategory(formData) {
   try {
-    const { data } = await webHttpService.post(
+    const { data } = await webHttpService.patch(
       `${import.meta.env.VITE_APIENDPOINT}/products/getCategory`,
       formData
     );
@@ -196,24 +154,10 @@ export async function updateCategoryStatus(id) {
   }
 }
 
-export async function viewCategory(id) {
+export async function deleteCategory(id) {
   try {
-    const { data } = await webHttpService.get(
-      `${import.meta.env.VITE_APIENDPOINT}/products/viewCategory/${id}`
-    );
-    console.log(data);
-
-    return data;
-  } catch (error) {
-    showGlobalAlert(error.message, "error");
-  }
-}
-
-export async function updateCategory(formData, id) {
-  try {
-    const { data } = await webHttpService.post(
-      `${import.meta.env.VITE_APIENDPOINT}/products/updateCategory/${id}`,
-      formData
+    const { data } = await webHttpService.delete(
+      `${import.meta.env.VITE_APIENDPOINT}/products/deleteCategory/${id}`
     );
     console.log(data);
 
