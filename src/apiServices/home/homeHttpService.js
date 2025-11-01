@@ -166,3 +166,30 @@ export async function deleteCategory(id) {
     showGlobalAlert(error.message, "error");
   }
 }
+
+export async function addCategory(formData) {
+  try {
+    const { data } = await webHttpService.post(
+      `${import.meta.env.VITE_APIENDPOINT}/products/addCategory`,
+      formData
+    );
+    console.log(data);
+
+    return data;
+  } catch (error) {
+    showGlobalAlert(error.message, "error");
+  }
+}
+export async function updateCategory(id, formData) {
+  try {
+    const { data } = await webHttpService.put(
+      `${import.meta.env.VITE_APIENDPOINT}/products/updateCategory/${id}`,
+      formData
+    );
+    console.log(data);
+
+    return data;
+  } catch (error) {
+    showGlobalAlert(error.message, "error");
+  }
+}

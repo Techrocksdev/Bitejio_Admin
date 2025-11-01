@@ -7,7 +7,7 @@ import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 
 // eslint-disable-next-line no-unused-vars
-function AddMerchant({ details, setDetails, refetch }) {
+function AddMerchant({ details, setDetails, refetch, setCurrentPage }) {
   const {
     register,
     handleSubmit,
@@ -62,15 +62,14 @@ function AddMerchant({ details, setDetails, refetch }) {
     delete data.confirmPassword;
 
     try {
-      const response = (await details?.firstName)
-        ? editUser(details._id, data)
-        : addMerchant(data);
+      const response = details?.firstName
+        ? await editUser(details._id, data)
+        : await addMerchant(data);
       if (!response.error) {
         showGlobalAlert(response.message, "success");
+        setCurrentPage(1);
+        await refetch();
         document.getElementById("closeAddMerchantModal").click();
-        setTimeout(() => {
-          refetch();
-        }, 500);
       } else {
         showGlobalAlert(response.message, "error");
       }

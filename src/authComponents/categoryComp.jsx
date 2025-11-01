@@ -11,7 +11,7 @@ import {
 } from "../apiServices/home/homeHttpService";
 import AddCategory from "./addCategory";
 
-function CategoryComp() {
+function CategoryComp({ type }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setpageSize] = useState(10);
   const [details, setDetails] = useState({});
@@ -24,13 +24,13 @@ function CategoryComp() {
     isLoading,
     refetch,
   } = useQuery({
-    queryKey: ["categoryList", currentPage, pageSize],
+    queryKey: ["categoryList", currentPage, pageSize, type],
     queryFn: async () => {
       const formData = {
         page: currentPage,
         pageSize: pageSize,
         categoryId: "",
-        allSubcategory: false,
+        allSubcategory: type === "Subcategory" ? true : false,
         search: "",
       };
       return getCategory(formData);
@@ -40,7 +40,7 @@ function CategoryComp() {
     },
   });
 
-  const results = response?.results?.data || [];
+  const results = response?.results?.categories || [];
   const totalPages = Math.ceil(response?.results?.totalPages);
 
   const handlePageChange = (newPage) => {
@@ -63,7 +63,7 @@ function CategoryComp() {
       console.log("An error occurred");
     }
   };
-  const deleteMerchant = async (id) => {
+  const deleteCate = async (id) => {
     try {
       const response = await deleteCategory(id);
       if (!response.error) {
@@ -94,6 +94,7 @@ function CategoryComp() {
           <thead className="table-light">
             <tr>
               <th>S.No</th>
+              <th>Image</th>
               <th>Category Name</th>
               <th>Status</th>
               <th className="text-center">Actions</th>
@@ -115,13 +116,21 @@ function CategoryComp() {
                   <td>
                     <Skeleton />
                   </td>
+                  <td>
+                    <Skeleton />
+                  </td>
                 </tr>
               ))
             ) : results?.length ? (
               results?.map((item, index) => (
                 <tr>
                   <td>{index + 1}</td>
-                  <td>{item.firstName}</td>
+                  <td>
+                    <div className="table-img">
+                      <img src={item.image} alt={item.image} />
+                    </div>
+                  </td>
+                  <td>{item.name_en}</td>
 
                   <td>
                     <div className="form-check form-switch">
@@ -158,7 +167,7 @@ function CategoryComp() {
               ))
             ) : (
               <tr>
-                <td colSpan="4" className="text-center">
+                <td colSpan="5" className="text-center">
                   Oops! No Result Found.
                 </td>
               </tr>
@@ -193,7 +202,7 @@ function CategoryComp() {
             </div>
             <div className="col-auto">
               <nav aria-label="Page navigation example">
-                <ul className="pagination border-0">
+                <ul className="pagination border-0 gap-2">
                   <li className="page-item">
                     <button
                       className={`page-link ${
@@ -202,7 +211,7 @@ function CategoryComp() {
                       onClick={() => handlePageChange(currentPage - 1)}
                       disabled={currentPage === 1}
                     >
-                      <img src="assets/img/page_left.png" alt="" />
+                      <i class="fa fa-angle-left"></i>
                     </button>
                   </li>
                   {Array.from({ length: totalPages })
@@ -250,7 +259,7 @@ function CategoryComp() {
                       onClick={() => handlePageChange(currentPage + 1)}
                       disabled={currentPage === totalPages}
                     >
-                      <img src="assets/img/pagee_right.png" alt="" />
+                      <i class="fa fa-angle-right"></i>
                     </button>
                   </li>
                 </ul>
@@ -273,6 +282,7 @@ function CategoryComp() {
             details={details}
             setDetails={setDetails}
             refetch={refetch}
+            setCurrentPage={setCurrentPage}
           />
         </div>
       </div>
@@ -289,13 +299,13 @@ function CategoryComp() {
               <div className="paymentmodal_main text-center">
                 <div className="payment_head mb-3 mt-1">
                   <h2>Confirmation</h2>
-                  <p>Are you sure you want to delete this user?</p>
+                  <p>Are you sure you want to delete this category?</p>
                 </div>
                 <div className="row justify-content-center mb-2">
                   <div className="col-auto">
                     <button
                       className="comman-btn-main"
-                      onClick={() => deleteMerchant(delId)}
+                      onClick={() => deleteCate(delId)}
                     >
                       Yes
                     </button>

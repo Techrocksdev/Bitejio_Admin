@@ -160,7 +160,7 @@ function Merchants() {
                           <td>{index + 1}</td>
                           <td>{item.firstName}</td>
                           <td>{item.lastName}</td>
-                          <td>{item.userName}</td>
+                          <td>{item.name}</td>
                           <td>{item.shopName}</td>
                           <td>
                             <div className="form-check form-switch">
@@ -241,7 +241,7 @@ function Merchants() {
                   </div>
                   <div className="col-auto">
                     <nav aria-label="Page navigation example">
-                      <ul className="pagination border-0">
+                      <ul className="pagination border-0 gap-2">
                         <li className="page-item">
                           <button
                             className={`page-link ${
@@ -250,7 +250,7 @@ function Merchants() {
                             onClick={() => handlePageChange(currentPage - 1)}
                             disabled={currentPage === 1}
                           >
-                            <img src="assets/img/page_left.png" alt="" />
+                            <i class="fa fa-angle-left"></i>
                           </button>
                         </li>
                         {Array.from({ length: totalPages })
@@ -298,7 +298,7 @@ function Merchants() {
                             onClick={() => handlePageChange(currentPage + 1)}
                             disabled={currentPage === totalPages}
                           >
-                            <img src="assets/img/pagee_right.png" alt="" />
+                            <i class="fa fa-angle-right"></i>
                           </button>
                         </li>
                       </ul>
@@ -342,7 +342,7 @@ function Merchants() {
                 <strong>Last Name:</strong> {details?.lastName}
               </p>
               <p>
-                <strong>Username:</strong> {details?.userName}
+                <strong>Username:</strong> {details?.name}
               </p>
               <p>
                 <strong>Email:</strong> {details?.email}
@@ -385,6 +385,7 @@ function Merchants() {
             details={details}
             setDetails={setDetails}
             refetch={refetch}
+            setCurrentPage={setCurrentPage}
           />
         </div>
       </div>

@@ -1,13 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import SideBar from "../commonComponents/sideBar";
 import Header from "../commonComponents/header";
 import { useUserAuth } from "../commonComponents/authContext";
 import CategoryComp from "./categoryComp";
-import SubCategoryComp from "./subCategoryComp";
 
 function Category() {
   const { isSidebarHidden } = useUserAuth();
+  const [type, setType] = useState("Category");
   return (
     <>
       <div className="admin-wrapper d-flex">
@@ -43,6 +43,7 @@ function Category() {
                       data-bs-toggle="tab"
                       href="#category"
                       role="tab"
+                      onClick={() => setType("Category")}
                     >
                       Category
                     </a>
@@ -54,6 +55,7 @@ function Category() {
                       data-bs-toggle="tab"
                       href="#subcategory"
                       role="tab"
+                      onClick={() => setType("Subcategory")}
                     >
                       Subcategory
                     </a>
@@ -65,11 +67,11 @@ function Category() {
                   id="category"
                   role="tabpanel"
                 >
-                  <CategoryComp />
+                  <CategoryComp type={type} />
                 </div>
                 {/* Subcategory Tab */}
                 <div className="tab-pane fade" id="subcategory" role="tabpanel">
-                  <SubCategoryComp />
+                  <CategoryComp type={type} />
                 </div>
               </div>
             </div>

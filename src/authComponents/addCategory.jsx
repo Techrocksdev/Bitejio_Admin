@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { showGlobalAlert } from "../commonComponents/useGlobalAlert";
-import { addMerchant, editUser } from "../apiServices/home/homeHttpService";
+import {
+  addCategory,
+  updateCategory,
+} from "../apiServices/home/homeHttpService";
 import { RotatingLines } from "react-loader-spinner";
 
 // eslint-disable-next-line no-unused-vars
-function AddCategory({ details, setDetails, refetch }) {
+function AddCategory({ details, setDetails, refetch, setCurrentPage }) {
   const {
     register,
     handleSubmit,
@@ -20,13 +23,17 @@ function AddCategory({ details, setDetails, refetch }) {
 
   const [loader, setLoader] = useState(false);
   const [file, setFile] = useState(null);
+  const [edit, setEdit] = useState(false);
 
   useEffect(() => {
     if (details?.name_en) {
       setValue("name_en", details?.name_en);
       setValue("status", details?.status);
+      setFile(details?.image);
     } else {
       reset();
+      setFile(null);
+      setEdit(false);
     }
   }, [details]);
 
@@ -39,22 +46,21 @@ function AddCategory({ details, setDetails, refetch }) {
 
     const formData = new FormData();
 
-    formData.append("image", file);
+    formData.append("images", file);
 
     Object.keys(data).forEach((key) => {
       formData.append(key, data[key]);
     });
 
     try {
-      const response = (await details?.name_en)
-        ? editUser(details._id, formData)
-        : addMerchant(formData);
+      const response = details?.name_en
+        ? await updateCategory(details._id, formData)
+        : await addCategory(formData);
       if (!response.error) {
         showGlobalAlert(response.message, "success");
+        setCurrentPage(1);
+        await refetch();
         document.getElementById("closeAddMerchantModal").click();
-        setTimeout(() => {
-          refetch();
-        }, 500);
       } else {
         showGlobalAlert(response.message, "error");
       }
@@ -68,14 +74,20 @@ function AddCategory({ details, setDetails, refetch }) {
   const handleImageUpload = (event) => {
     const selectedFile = event.target.files[0];
     setFile(selectedFile);
+    if (details?.name_en) {
+      setEdit(true);
+    } else {
+      setEdit(false);
+    }
   };
+  console.log(file, edit, details?.name_en);
 
   return (
     <>
       <div className="modal-content">
         <div className="modal-header">
           <h5 className="modal-title text-main fw-bold">
-            {details?.name_en ? "Edit" : "Add"} Merchant
+            {details?.name_en ? "Edit" : "Add"} Category
           </h5>
           <button
             type="button"
@@ -86,15 +98,30 @@ function AddCategory({ details, setDetails, refetch }) {
             onClick={() => {
               reset();
               setDetails({});
+              setFile(null);
+              setEdit(false);
             }}
           />
         </div>
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="modal-body row g-3">
             <div className="mb-3">
-              {file?.name ? (
-                <div className="img-wrap">
-                  <img src={URL.createObjectURL(file)} alt="Uploaded Image" />
+              {file?.name || file ? (
+                <div className="img-wrap position-relative">
+                  <img
+                    src={
+                      details.name_en && file && edit
+                        ? URL.createObjectURL(file)
+                        : details.name_en && file && !edit
+                        ? file
+                        : URL.createObjectURL(file)
+                    }
+                    alt="Uploaded Image"
+                  />
+                  <i
+                    className="fas fa-remove"
+                    onClick={() => setFile(null)}
+                  ></i>
                 </div>
               ) : (
                 <label htmlFor="photo-upload" className="custom-file-upload">
@@ -106,8 +133,10 @@ function AddCategory({ details, setDetails, refetch }) {
                 </label>
               )}
               <input
+                className="d-none"
                 id="photo-upload"
                 type="file"
+                accept="image/*"
                 onChange={(e) => handleImageUpload(e)}
               />
             </div>
@@ -121,7 +150,7 @@ function AddCategory({ details, setDetails, refetch }) {
                   errors.name_en ? "input-error" : ""
                 }`}
                 placeholder="Enter category name"
-                {...register("name_en ", {
+                {...register("name_en", {
                   required: "Category name is required",
                 })}
               />
