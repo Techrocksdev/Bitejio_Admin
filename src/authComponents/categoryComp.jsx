@@ -10,6 +10,7 @@ import {
   updateCategoryStatus,
 } from "../apiServices/home/homeHttpService";
 import AddCategory from "./addCategory";
+import AddSubCategory from "./addSubCategory";
 
 function CategoryComp({ type }) {
   const [currentPage, setCurrentPage] = useState(1);
@@ -78,6 +79,7 @@ function CategoryComp({ type }) {
       console.log("An error occurred");
     }
   };
+
   return (
     <>
       <div className="d-flex justify-content-end align-items-center mb-3">
@@ -86,94 +88,187 @@ function CategoryComp({ type }) {
           data-bs-toggle="modal"
           data-bs-target="#addCategoryModal"
         >
-          <i className="fa fa-plus" /> Add Category
+          <i className="fa fa-plus" />{" "}
+          {type === "Subcategory" ? "Add Sub Category" : "Add Category"}
         </button>
       </div>
       <div className="table-responsive">
-        <table className="table table-hover align-middle">
-          <thead className="table-light">
-            <tr>
-              <th>S.No</th>
-              <th>Image</th>
-              <th>Category Name</th>
-              <th>Status</th>
-              <th className="text-center">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {isLoading ? (
-              [...Array(pageSize)].map((_, index) => (
-                <tr key={index}>
-                  <td>
-                    <Skeleton />
-                  </td>
-                  <td>
-                    <Skeleton />
-                  </td>
-                  <td>
-                    <Skeleton />
-                  </td>
-                  <td>
-                    <Skeleton />
-                  </td>
-                  <td>
-                    <Skeleton />
-                  </td>
-                </tr>
-              ))
-            ) : results?.length ? (
-              results?.map((item, index) => (
-                <tr>
-                  <td>{index + 1}</td>
-                  <td>
-                    <div className="table-img">
-                      <img src={item.image} alt={item.image} />
-                    </div>
-                  </td>
-                  <td>{item.name_en}</td>
-
-                  <td>
-                    <div className="form-check form-switch">
-                      <input
-                        className="form-check-input"
-                        type="checkbox"
-                        checked={item.status}
-                        onChange={() => changeStatus(item._id)}
-                      />
-                    </div>
-                  </td>
-                  <td className="text-center">
-                    <button
-                      className="table-btn bg-main me-2"
-                      data-bs-toggle="modal"
-                      data-bs-target="#addCategoryModal"
-                      onClick={() => setDetails(item)}
-                    >
-                      <i className="fa fa-edit" />
-                    </button>
-                    <button
-                      className="table-btn bg-danger"
-                      data-bs-toggle="modal"
-                      data-bs-target="#delete"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setDelId(item._id);
-                      }}
-                    >
-                      <i className="fa fa-trash" />
-                    </button>
-                  </td>
-                </tr>
-              ))
-            ) : (
+        {type === "Subcategory" ? (
+          <table className="table table-hover align-middle">
+            <thead className="table-light">
               <tr>
-                <td colSpan="5" className="text-center">
-                  Oops! No Result Found.
-                </td>
+                <th>S.No</th>
+                <th>Image</th>
+                <th>Category Name</th>
+                <th>Sub Category Name</th>
+                <th>Status</th>
+                <th className="text-center">Actions</th>
               </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {isLoading ? (
+                [...Array(pageSize)].map((_, index) => (
+                  <tr key={index}>
+                    <td>
+                      <Skeleton />
+                    </td>
+                    <td>
+                      <Skeleton />
+                    </td>
+                    <td>
+                      <Skeleton />
+                    </td>
+                    <td>
+                      <Skeleton />
+                    </td>
+                    <td>
+                      <Skeleton />
+                    </td>
+                    <td>
+                      <Skeleton />
+                    </td>
+                  </tr>
+                ))
+              ) : results?.length ? (
+                results?.map((item, index) => (
+                  <tr>
+                    <td>{index + 1}</td>
+                    <td>
+                      <div className="table-img">
+                        <img src={item.image} alt={item.image} />
+                      </div>
+                    </td>
+                    <td>{item?.parentCategory?.name_en}</td>
+                    <td>{item.name_en}</td>
+
+                    <td>
+                      <div className="form-check form-switch">
+                        <input
+                          className="form-check-input"
+                          type="checkbox"
+                          checked={item.status}
+                          onChange={() => changeStatus(item._id)}
+                        />
+                      </div>
+                    </td>
+                    <td className="text-center">
+                      <button
+                        className="table-btn bg-main me-2"
+                        data-bs-toggle="modal"
+                        data-bs-target="#addCategoryModal"
+                        onClick={() => setDetails(item)}
+                      >
+                        <i className="fa fa-edit" />
+                      </button>
+                      <button
+                        className="table-btn bg-danger"
+                        data-bs-toggle="modal"
+                        data-bs-target="#delete"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDelId(item._id);
+                        }}
+                      >
+                        <i className="fa fa-trash" />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="6" className="text-center">
+                    Oops! No Result Found.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        ) : (
+          <table className="table table-hover align-middle">
+            <thead className="table-light">
+              <tr>
+                <th>S.No</th>
+                <th>Image</th>
+                <th>Category Name</th>
+                <th>Status</th>
+                <th className="text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {isLoading ? (
+                [...Array(pageSize)].map((_, index) => (
+                  <tr key={index}>
+                    <td>
+                      <Skeleton />
+                    </td>
+                    <td>
+                      <Skeleton />
+                    </td>
+                    <td>
+                      <Skeleton />
+                    </td>
+                    <td>
+                      <Skeleton />
+                    </td>
+                    <td>
+                      <Skeleton />
+                    </td>
+                  </tr>
+                ))
+              ) : results?.length ? (
+                results?.map((item, index) => (
+                  <tr>
+                    <td>{index + 1}</td>
+                    <td>
+                      <div className="table-img">
+                        <img src={item.image} alt={item.image} />
+                      </div>
+                    </td>
+                    <td>{item.name_en}</td>
+
+                    <td>
+                      <div className="form-check form-switch">
+                        <input
+                          className="form-check-input"
+                          type="checkbox"
+                          checked={item.status}
+                          onChange={() => changeStatus(item._id)}
+                        />
+                      </div>
+                    </td>
+                    <td className="text-center">
+                      <button
+                        className="table-btn bg-main me-2"
+                        data-bs-toggle="modal"
+                        data-bs-target="#addCategoryModal"
+                        onClick={() => setDetails(item)}
+                      >
+                        <i className="fa fa-edit" />
+                      </button>
+                      <button
+                        className="table-btn bg-danger"
+                        data-bs-toggle="modal"
+                        data-bs-target="#delete"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDelId(item._id);
+                        }}
+                      >
+                        <i className="fa fa-trash" />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="5" className="text-center">
+                    Oops! No Result Found.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        )}
       </div>
       {results?.length ? (
         <div className="col-md-12 mt-3">
@@ -278,12 +373,22 @@ function CategoryComp({ type }) {
         data-bs-backdrop="static"
       >
         <div className="modal-dialog modal-dialog-centered modal-lg">
-          <AddCategory
-            details={details}
-            setDetails={setDetails}
-            refetch={refetch}
-            setCurrentPage={setCurrentPage}
-          />
+          {type === "Subcategory" ? (
+            <AddSubCategory
+              details={details}
+              setDetails={setDetails}
+              refetch={refetch}
+              setCurrentPage={setCurrentPage}
+              type={type}
+            />
+          ) : (
+            <AddCategory
+              details={details}
+              setDetails={setDetails}
+              refetch={refetch}
+              setCurrentPage={setCurrentPage}
+            />
+          )}
         </div>
       </div>
       <div

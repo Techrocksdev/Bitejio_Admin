@@ -3,12 +3,20 @@ import { useForm } from "react-hook-form";
 import { showGlobalAlert } from "../commonComponents/useGlobalAlert";
 import {
   addCategory,
+  getCategory,
   updateCategory,
 } from "../apiServices/home/homeHttpService";
 import { RotatingLines } from "react-loader-spinner";
+import { useQuery } from "@tanstack/react-query";
 
 // eslint-disable-next-line no-unused-vars
-function AddSubCategory({ details, setDetails, refetch, setCurrentPage }) {
+function AddSubCategory({
+  details,
+  setDetails,
+  refetch,
+  setCurrentPage,
+  type,
+}) {
   const {
     register,
     handleSubmit,
@@ -29,6 +37,7 @@ function AddSubCategory({ details, setDetails, refetch, setCurrentPage }) {
     if (details?.name_en) {
       setValue("name_en", details?.name_en);
       setValue("status", details?.status);
+      setValue("parentCategoryId", details?.parentCategory?._id);
       setFile(details?.image);
     } else {
       reset();
@@ -38,8 +47,8 @@ function AddSubCategory({ details, setDetails, refetch, setCurrentPage }) {
   }, [details]);
 
   const onSubmit = async (data) => {
-    if (!file?.name) {
-      alert.show("Please upload a file");
+    if (!file?.name && !file) {
+      showGlobalAlert("Please upload a file", "error");
       return;
     }
     setLoader(true);
@@ -80,6 +89,25 @@ function AddSubCategory({ details, setDetails, refetch, setCurrentPage }) {
       setEdit(false);
     }
   };
+  const { data: response2 } = useQuery({
+    queryKey: ["selectCategoryList", type],
+    queryFn: async () => {
+      const formData = {
+        page: 1,
+        pageSize: 1000,
+        categoryId: "",
+        allSubcategory: false,
+        search: "",
+      };
+      return getCategory(formData);
+    },
+    onError: (error) => {
+      console.log(error);
+    },
+  });
+
+  const selectList = response2?.results?.categories || [];
+  console.log(file, edit, details?.name_en);
 
   return (
     <>
@@ -109,9 +137,11 @@ function AddSubCategory({ details, setDetails, refetch, setCurrentPage }) {
                 <div className="img-wrap position-relative">
                   <img
                     src={
-                      file && edit && details?.name_en
+                      details.name_en && file && edit
                         ? URL.createObjectURL(file)
-                        : file
+                        : details.name_en && file && !edit
+                        ? file
+                        : URL.createObjectURL(file)
                     }
                     alt="Uploaded Image"
                   />
@@ -147,8 +177,12 @@ function AddSubCategory({ details, setDetails, refetch, setCurrentPage }) {
                   required: "Category name is required",
                 })}
               >
-                <option>Pizza</option>
-                <option>Burger</option>
+                <option hidden>Select Category</option>
+                {selectList.map((item) => (
+                  <option key={item._id} value={item._id}>
+                    {item.name_en}
+                  </option>
+                ))}
               </select>
               {errors.parentCategoryId && (
                 <p className="form-error">{errors.parentCategoryId.message}</p>
@@ -156,16 +190,16 @@ function AddSubCategory({ details, setDetails, refetch, setCurrentPage }) {
             </div>
             <div className="col-md-6">
               <label className="form-label fw-semibold">
-                Subcategory Name <span className="text-danger">*</span>
+                Sub Category Name <span className="text-danger">*</span>
               </label>
               <input
                 type="text"
                 className={`form-control ${
                   errors.name_en ? "input-error" : ""
                 }`}
-                placeholder="Enter subcategory name"
+                placeholder="Enter sub category name"
                 {...register("name_en", {
-                  required: "Category name is required",
+                  required: "Sub Category name is required",
                 })}
               />
               {errors.name_en && (

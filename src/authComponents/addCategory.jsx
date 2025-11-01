@@ -38,8 +38,9 @@ function AddCategory({ details, setDetails, refetch, setCurrentPage }) {
   }, [details]);
 
   const onSubmit = async (data) => {
-    if (!file?.name) {
-      alert.show("Please upload a file");
+    console.log(file);
+    if (!file?.name && !file) {
+      showGlobalAlert("Please upload a file", "error");
       return;
     }
     setLoader(true);
