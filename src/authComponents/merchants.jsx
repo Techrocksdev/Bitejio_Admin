@@ -402,7 +402,7 @@ function Merchants() {
               <div className="paymentmodal_main text-center">
                 <div className="payment_head mb-3 mt-1">
                   <h2>Confirmation</h2>
-                  <p>Are you sure you want to delete this user?</p>
+                  <p>Are you sure you want to delete this merchant?</p>
                 </div>
                 <div className="row justify-content-center mb-2">
                   <div className="col-auto">

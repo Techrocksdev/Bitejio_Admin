@@ -2,7 +2,8 @@ import React from "react";
 import { useUserAuth } from "./authContext";
 
 function Header() {
-  const { toggleSidebar } = useUserAuth();
+  const { toggleSidebar, profile } = useUserAuth();
+  console.log(profile);
   return (
     <>
       <header className="admin-header d-flex justify-content-between align-items-center px-4">
@@ -22,12 +23,8 @@ function Header() {
             id="accountMenu"
             data-bs-toggle="dropdown"
           >
-            <img
-              src="../../assets/image/users/user.png"
-              className="rounded-circle me-2 user"
-              alt="Admin"
-            />
-            <span className="fw-semibold">Admin</span>
+            <i className="fa fa-user me-2"></i>
+            <span className="fw-semibold">{profile?.name}</span>
           </a>
           <ul
             className="dropdown-menu dropdown-menu-end"

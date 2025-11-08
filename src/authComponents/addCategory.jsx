@@ -47,7 +47,7 @@ function AddCategory({ details, setDetails, refetch, setCurrentPage }) {
 
     const formData = new FormData();
 
-    formData.append("images", file);
+    formData.append("images", details.name_en && file && !edit ? [] : file);
 
     Object.keys(data).forEach((key) => {
       formData.append(key, data[key]);

@@ -193,3 +193,15 @@ export async function updateCategory(id, formData) {
     showGlobalAlert(error.message, "error");
   }
 }
+export async function getMyProfile() {
+  try {
+    const { data } = await webHttpService.get(
+      `${import.meta.env.VITE_APIENDPOINT}/user/getMyProfile`
+    );
+    console.log(data);
+
+    return data;
+  } catch (error) {
+    showGlobalAlert(error.message, "error");
+  }
+}
