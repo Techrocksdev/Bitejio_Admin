@@ -114,6 +114,7 @@ function Users() {
                       <th>First Name</th>
                       <th>Last Name</th>
                       <th>Username</th>
+                      <th>Phone Number</th>
                       <th>Shop Name</th>
                       <th>Role</th>
                       <th>Status</th>
@@ -148,17 +149,21 @@ function Users() {
                           <td>
                             <Skeleton />
                           </td>
+                          <td>
+                            <Skeleton />
+                          </td>
                         </tr>
                       ))
                     ) : results?.length ? (
                       results?.map((item, index) => (
                         <tr>
                           <td>{index + 1}</td>
-                          <td>{item.firstName}</td>
-                          <td>{item.lastName}</td>
-                          <td>{item.name}</td>
-                          <td>{item.shopName}</td>
-                          <td>{item.userType}</td>
+                          <td>{item.firstName || "N/A"}</td>
+                          <td>{item.lastName || "N/A"}</td>
+                          <td>{item.name || "N/A"}</td>
+                          <td>{item.phoneNumber || "N/A"}</td>
+                          <td>{item.shopName || "N/A"}</td>
+                          <td>{item.userType || "N/A"}</td>
                           <td>
                             <div className="form-check form-switch">
                               <input
@@ -195,7 +200,7 @@ function Users() {
                       ))
                     ) : (
                       <tr>
-                        <td colSpan="8" className="text-center">
+                        <td colSpan="9" className="text-center">
                           Oops! No Result Found.
                         </td>
                       </tr>
@@ -323,27 +328,27 @@ function Users() {
             </div>
             <div className="modal-body">
               <p>
-                <strong>First Name:</strong> {details?.firstName}
+                <strong>First Name:</strong> {details?.firstName || "N/A"}
               </p>
               <p>
-                <strong>Last Name:</strong> {details?.lastName}
+                <strong>Last Name:</strong> {details?.lastName || "N/A"}
               </p>
               <p>
-                <strong>Username:</strong> {details?.name}
+                <strong>Username:</strong> {details?.name || "N/A"}
               </p>
               <p>
-                <strong>Email:</strong> {details?.email}
+                <strong>Email:</strong> {details?.email || "N/A"}
               </p>
               <p>
-                <strong>Shop Name:</strong> {details?.shopName}
+                <strong>Phone Number:</strong> {details?.phoneNumber}
+              </p>
+              <p>
+                <strong>Shop Name:</strong> {details?.shopName || "N/A"}
               </p>
               <p>
                 <strong>Role:</strong> {details?.userType}
               </p>
 
-              <p>
-                <strong> Phone Number:</strong> {details?.phoneNumber}
-              </p>
               <p>
                 <strong>Status:</strong>{" "}
                 {details?.status ? "Active" : "Inactive"}

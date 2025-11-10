@@ -37,7 +37,7 @@ function AddMerchant({ details, setDetails, refetch, setCurrentPage }) {
     if (details?.firstName) {
       setValue("firstName", details?.firstName);
       setValue("lastName", details?.lastName);
-      setValue("userName", details?.userName);
+      setValue("userName", details?.name);
       setValue("shopName", details?.shopName);
       setValue("email", details?.email);
       if (details?.phoneNumber) {
@@ -289,72 +289,80 @@ function AddMerchant({ details, setDetails, refetch, setCurrentPage }) {
                 <p className="form-error">{errors.phoneNumber.message}</p>
               )}
             </div>
+            {details?.firstName ? (
+              ""
+            ) : (
+              <>
+                <div className="col-md-6">
+                  <label className="form-label fw-semibold">
+                    Password <span className="text-danger">*</span>
+                  </label>
+                  <div className="position-relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      className={`form-control pe-5 ${
+                        errors.password ? "input-error" : ""
+                      }`}
+                      placeholder="Enter password"
+                      {...register("password", {
+                        required: "Password is required",
+                        minLength: {
+                          value: 8,
+                          message: "Password must be at least 8 characters",
+                        },
+                        pattern: {
+                          value:
+                            /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#^])[A-Za-z\d@$!%*?&#^]/,
+                          message:
+                            "Password must contain uppercase, number and special character",
+                        },
+                      })}
+                    />
+                    <i
+                      className={`fa pass-eye ${
+                        showPassword ? "fa-eye-slash" : "fa-eye"
+                      }`}
+                      onClick={togglePasswordVisibility}
+                    ></i>
+                  </div>
+                  {errors.password && (
+                    <p className="form-error">{errors.password.message}</p>
+                  )}
+                </div>
 
-            <div className="col-md-6">
-              <label className="form-label fw-semibold">
-                Password <span className="text-danger">*</span>
-              </label>
-              <div className="position-relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  className={`form-control pe-5 ${
-                    errors.password ? "input-error" : ""
-                  }`}
-                  placeholder="Enter password"
-                  {...register("password", {
-                    required: "Password is required",
-                    minLength: {
-                      value: 8,
-                      message: "Password must be at least 8 characters",
-                    },
-                    pattern: {
-                      value:
-                        /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#^])[A-Za-z\d@$!%*?&#^]/,
-                      message:
-                        "Password must contain uppercase, number and special character",
-                    },
-                  })}
-                />
-                <i
-                  className={`fa pass-eye ${
-                    showPassword ? "fa-eye-slash" : "fa-eye"
-                  }`}
-                  onClick={togglePasswordVisibility}
-                ></i>
-              </div>
-              {errors.password && (
-                <p className="form-error">{errors.password.message}</p>
-              )}
-            </div>
-
-            <div className="col-md-6">
-              <label className="form-label fw-semibold">
-                Confirm Password <span className="text-danger">*</span>
-              </label>
-              <div className="position-relative">
-                <input
-                  type={showConfirmPassword ? "text" : "password"}
-                  className={`form-control ${
-                    errors.confirmPassword ? "input-error" : ""
-                  }`}
-                  placeholder="Confirm password"
-                  {...register("confirmPassword", {
-                    required: "Please confirm your password",
-                    validate: (value) =>
-                      value === watch("password") || "Passwords do not match",
-                  })}
-                />
-                <i
-                  className={`fa pass-eye ${
-                    showConfirmPassword ? "fa-eye-slash" : "fa-eye"
-                  }`}
-                  onClick={toggleConfirmPasswordVisibility}
-                ></i>
-              </div>
-              {errors.confirmPassword && (
-                <p className="form-error">{errors.confirmPassword.message}</p>
-              )}
-            </div>
+                <div className="col-md-6">
+                  <label className="form-label fw-semibold">
+                    Confirm Password <span className="text-danger">*</span>
+                  </label>
+                  <div className="position-relative">
+                    <input
+                      type={showConfirmPassword ? "text" : "password"}
+                      className={`form-control ${
+                        errors.confirmPassword ? "input-error" : ""
+                      }`}
+                      placeholder="Confirm password"
+                      {...register("confirmPassword", {
+                        required: "Please confirm your password",
+                        validate: (value) =>
+                          value === watch("password") ||
+                          "Passwords do not match",
+                      })}
+                    />
+                    <i
+                      className={`fa pass-eye ${
+                        showConfirmPassword ? "fa-eye-slash" : "fa-eye"
+                      }`}
+                      onClick={toggleConfirmPasswordVisibility}
+                    ></i>
+                  </div>
+                  {errors.confirmPassword && (
+                    <p className="form-error">
+                      {errors.confirmPassword.message}
+                    </p>
+                  )}
+                </div>
+              </>
+            )}
 
             <div className="col-md-6 d-flex align-items-center">
               <label className="form-label fw-semibold me-3">Status</label>
