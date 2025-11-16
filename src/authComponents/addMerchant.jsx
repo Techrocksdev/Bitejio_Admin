@@ -188,11 +188,7 @@ function AddMerchant({ details, setDetails, refetch, setCurrentPage }) {
                     value: 30,
                     message: "Username must be less than 30 characters",
                   },
-                  pattern: {
-                    value: /^[a-zA-Z0-9_]+$/,
-                    message:
-                      "Username can only contain letters, numbers and underscore",
-                  },
+                  
                 })}
               />
               {errors.userName && (
