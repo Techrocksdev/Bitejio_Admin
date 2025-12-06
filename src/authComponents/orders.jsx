@@ -1,0 +1,412 @@
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import SideBar from "../commonComponents/sideBar";
+import Header from "../commonComponents/header";
+import { useUserAuth } from "../commonComponents/authContext";
+import { useQuery } from "@tanstack/react-query";
+import { deleteUser, getOrders } from "../apiServices/home/homeHttpService";
+import { showGlobalAlert } from "../commonComponents/useGlobalAlert";
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
+
+function Orders() {
+  const { isSidebarHidden } = useUserAuth();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setpageSize] = useState(10);
+  const [details, setDetails] = useState({});
+  const [delId, setDelId] = useState("");
+
+  useEffect(() => {}, [details]);
+  const {
+    data: response,
+    isLoading,
+    refetch,
+  } = useQuery({
+    queryKey: ["ordersList", currentPage, pageSize],
+    queryFn: async () => {
+      const formData = {
+        page: currentPage,
+        pageSize: pageSize,
+        search: "",
+        userId: "",
+        year: 2025,
+        month: 0,
+        startDate: "2025-12-06",
+        endDate: "2025-12-06",
+      };
+      return getOrders(formData);
+    },
+    onError: (error) => {
+      console.log(error);
+    },
+  });
+
+  const results = response?.results.orders || [];
+  const totalPages = Math.ceil(response?.results?.totalPages);
+
+  const handlePageChange = (newPage) => {
+    if (newPage > 0 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+    }
+  };
+
+  const deleteOrder = async (id) => {
+    try {
+      const response = await deleteUser(id);
+      if (!response.error) {
+        showGlobalAlert(response.message, "success");
+        document.getElementById("close").click();
+        refetch();
+      } else {
+        showGlobalAlert(response.message, "error");
+      }
+      // eslint-disable-next-line no-unused-vars
+    } catch (error) {
+      console.log("An error occurred");
+    }
+  };
+
+  return (
+    <>
+      <div className="admin-wrapper d-flex">
+        <SideBar />
+
+        <div
+          className={
+            isSidebarHidden
+              ? "main-content flex-grow-1 full"
+              : "main-content flex-grow-1"
+          }
+          id="main-content"
+        >
+          <Header />
+
+          <main className="p-4">
+            <div className="card">
+              <div className="card-header">
+                <div className="d-flex gap-3 align-items-center justify-content-between">
+                  <h3 className="fw-semibold fs-5">Order Management</h3>
+                </div>
+              </div>
+              <div className="table-responsive shadow-sm rounded bg-white p-3">
+                <table className="table table-hover align-middle">
+                  <thead className="table-light">
+                    <tr>
+                      <th>S.No</th>
+                      <th>Order ID</th>
+                      <th>Customer</th>
+                      <th>Merchant</th>
+                      <th>Items</th>
+                      <th>Total</th>
+                      <th>Status</th>
+                      <th>Date</th>
+                      <th className="text-center">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {isLoading ? (
+                      [...Array(pageSize)].map((_, index) => (
+                        <tr key={index}>
+                          <td>
+                            <Skeleton />
+                          </td>
+                          <td>
+                            <Skeleton />
+                          </td>
+                          <td>
+                            <Skeleton />
+                          </td>
+                          <td>
+                            <Skeleton />
+                          </td>
+                          <td>
+                            <Skeleton />
+                          </td>
+                          <td>
+                            <Skeleton />
+                          </td>
+                          <td>
+                            <Skeleton />
+                          </td>
+                          <td>
+                            <Skeleton />
+                          </td>
+                          <td>
+                            <Skeleton />
+                          </td>
+                        </tr>
+                      ))
+                    ) : results?.length ? (
+                      results?.map((item) => (
+                        <tr key={item._id}>
+                          <td>1</td>
+                          <td>#ORD1001</td>
+                          <td>Aryan Saini</td>
+                          <td>Pizza Hut</td>
+                          <td>2x Pizza, 1x Coke</td>
+                          <td>₹550</td>
+                          <td>
+                            <select className="form-select form-select-sm status-dropdown">
+                              <option value="pending">Pending</option>
+                              <option value="preparing" selected>
+                                Preparing
+                              </option>
+                              <option value="out-for-delivery">
+                                Out for Delivery
+                              </option>
+                              <option value="delivered">Delivered</option>
+                              <option value="cancelled">Cancelled</option>
+                            </select>
+                          </td>
+                          <td>09 Sep 2025, 7:45 PM</td>
+                          <td className="text-center">
+                            <button
+                              className="table-btn bg-main me-2"
+                              data-bs-toggle="modal"
+                              data-bs-target="#viewOrderModal"
+                            >
+                              <i className="fa fa-eye" />
+                            </button>
+                            <button className="table-btn bg-danger">
+                              <i className="fa fa-trash" />
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="9" className="text-center">
+                          Oops! No Result Found.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            {results?.length ? (
+              <div className="col-md-12 mt-3">
+                <div className="row align-items-center justify-content-between">
+                  <div className="col-auto">
+                    <div className="datafilter">
+                      <span>Showing</span>
+                      <select
+                        className="form-select"
+                        aria-label="Default select example"
+                        value={pageSize}
+                        onChange={(e) => {
+                          setpageSize(parseInt(e.target.value, 10));
+                          setCurrentPage(1);
+                        }}
+                      >
+                        <option value="">Select</option>
+                        <option value={10}>10</option>
+                        <option value={15}>15</option>
+                        <option value={20}>20</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div className="col-auto">
+                    <div className="page_txt"></div>
+                  </div>
+                  <div className="col-auto">
+                    <nav aria-label="Page navigation example">
+                      <ul className="pagination border-0 gap-2">
+                        <li className="page-item">
+                          <button
+                            className={`page-link ${
+                              currentPage === 1 ? "disabled" : ""
+                            }`}
+                            onClick={() => handlePageChange(currentPage - 1)}
+                            disabled={currentPage === 1}
+                          >
+                            <i class="fa fa-angle-left"></i>
+                          </button>
+                        </li>
+                        {Array.from({ length: totalPages })
+                          .map((_, index) => index + 1)
+                          .filter((page) => {
+                            return (
+                              page === 1 ||
+                              page === totalPages ||
+                              Math.abs(page - currentPage) <= 2
+                            );
+                          })
+                          .reduce((acc, page, index, array) => {
+                            if (index > 0 && page - array[index - 1] > 1) {
+                              acc.push("...");
+                            }
+                            acc.push(page);
+                            return acc;
+                          }, [])
+                          .map((page, index) =>
+                            page === "..." ? (
+                              <span key={index} className="pagination-ellipsis">
+                                ...
+                              </span>
+                            ) : (
+                              <>
+                                <li className="page-item">
+                                  <button
+                                    key={index}
+                                    className={`page-link ${
+                                      currentPage === page ? "active" : ""
+                                    }`}
+                                    onClick={() => handlePageChange(page)}
+                                  >
+                                    {page}
+                                  </button>
+                                </li>
+                              </>
+                            )
+                          )}
+                        <li className="page-item">
+                          <button
+                            className={`page-link ${
+                              currentPage === totalPages ? "disabled" : ""
+                            }`}
+                            onClick={() => handlePageChange(currentPage + 1)}
+                            disabled={currentPage === totalPages}
+                          >
+                            <i class="fa fa-angle-right"></i>
+                          </button>
+                        </li>
+                      </ul>
+                    </nav>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              ""
+            )}
+          </main>
+        </div>
+      </div>
+      <div
+        className="modal fade"
+        id="viewOrderModal"
+        tabIndex={-1}
+        aria-hidden="true"
+      >
+        <div className="modal-dialog modal-dialog-centered modal-lg">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title text-main fw-bold">Order Details</h5>
+              <button
+                type="button"
+                className="btn-close"
+                data-bs-dismiss="modal"
+              />
+            </div>
+            <div className="modal-body">
+              <div className="row g-4">
+                {/* Customer Details */}
+                <div className="col-md-6">
+                  <h6 className="fw-bold text-main mb-2">Customer Details</h6>
+                  <p>
+                    <strong>Name:</strong> Aryan Saini
+                  </p>
+                  <p>
+                    <strong>Email:</strong> aryan@example.com
+                  </p>
+                  <p>
+                    <strong>Phone:</strong> +91 9876543210
+                  </p>
+                  <p>
+                    <strong>Address:</strong> Sector 62, Noida, UP
+                  </p>
+                </div>
+                {/* Merchant Details */}
+                <div className="col-md-6">
+                  <h6 className="fw-bold text-main mb-2">Merchant Details</h6>
+                  <p>
+                    <strong>Shop:</strong> Pizza Hut
+                  </p>
+                  <p>
+                    <strong>Contact:</strong> +91 9998887777
+                  </p>
+                  <p>
+                    <strong>Location:</strong> GIP Mall, Noida
+                  </p>
+                </div>
+                {/* Order Details */}
+                <div className="col-12">
+                  <h6 className="fw-bold text-main mb-2">Order Information</h6>
+                  <p>
+                    <strong>Order ID:</strong> #ORD1001
+                  </p>
+                  <p>
+                    <strong>Items:</strong> 2x Pizza, 1x Coke
+                  </p>
+                  <p>
+                    <strong>Total Amount:</strong> ₹550
+                  </p>
+                  <p>
+                    <strong>Payment Method:</strong> UPI
+                  </p>
+                  <p>
+                    <strong>Status:</strong> Preparing
+                  </p>
+                  <p>
+                    <strong>Placed At:</strong> 09 Sep 2025, 7:45 PM
+                  </p>
+                  <p>
+                    <strong>Expected Delivery:</strong> 09 Sep 2025, 8:30 PM
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="btn comman-btn-main" data-bs-dismiss="modal">
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        className="modal fade logoutmodal"
+        id="delete"
+        tabIndex={-1}
+        aria-labelledby="exampleModalLabel"
+        aria-hidden="true"
+      >
+        <div className="modal-dialog modal-dialog-centered">
+          <div className="modal-content">
+            <div className="modal-body">
+              <div className="paymentmodal_main text-center">
+                <div className="payment_head mb-3 mt-1">
+                  <h2>Confirmation</h2>
+                  <p>Are you sure you want to delete this order?</p>
+                </div>
+                <div className="row justify-content-center mb-2">
+                  <div className="col-auto">
+                    <button
+                      className="comman-btn-main"
+                      onClick={() => deleteUser(delId)}
+                    >
+                      Yes
+                    </button>
+                  </div>
+                  <div className="col-auto">
+                    <Link
+                      className="comman-btn-main white"
+                      data-bs-dismiss="modal"
+                      to=""
+                      onClick={() => setDelId("")}
+                      id="close"
+                    >
+                      No
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+export default React.memo(Orders);
