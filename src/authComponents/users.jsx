@@ -113,9 +113,9 @@ function Users() {
                       <th>S.No</th>
                       <th>First Name</th>
                       <th>Last Name</th>
-                      <th>Username</th>
+                      <th>Email</th>
                       <th>Phone Number</th>
-                      <th>Shop Name</th>
+                      <th>DOB</th>
                       <th>Role</th>
                       <th>Status</th>
                       <th className="text-center">Actions</th>
@@ -160,9 +160,9 @@ function Users() {
                           <td>{index + 1}</td>
                           <td>{item.firstName || "N/A"}</td>
                           <td>{item.lastName || "N/A"}</td>
-                          <td>{item.name || "N/A"}</td>
+                          <td>{item.email || "N/A"}</td>
                           <td>{item.phoneNumber || "N/A"}</td>
-                          <td>{item.shopName || "N/A"}</td>
+                          <td>{item.dob || "N/A"}</td>
                           <td>{item.userType || "N/A"}</td>
                           <td>
                             <div className="form-check form-switch">
@@ -334,16 +334,13 @@ function Users() {
                 <strong>Last Name:</strong> {details?.lastName || "N/A"}
               </p>
               <p>
-                <strong>Username:</strong> {details?.name || "N/A"}
-              </p>
-              <p>
                 <strong>Email:</strong> {details?.email || "N/A"}
               </p>
               <p>
                 <strong>Phone Number:</strong> {details?.phoneNumber}
               </p>
               <p>
-                <strong>Shop Name:</strong> {details?.shopName || "N/A"}
+                <strong>DOB:</strong> {details?.dob || "N/A"}
               </p>
               <p>
                 <strong>Role:</strong> {details?.userType}
