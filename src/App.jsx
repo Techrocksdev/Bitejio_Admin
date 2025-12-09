@@ -26,12 +26,12 @@ const Orders = lazy(() => import("./authComponents/orders"));
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 2 * 60 * 1000,
-      gcTime: 10 * 60 * 1000,
-      refetchOnWindowFocus: false,
-      refetchOnMount: false,
+      staleTime: 0,
+      cacheTime: 10 * 60 * 1000,
+      refetchOnWindowFocus: true,
+      refetchOnMount: true,
       refetchOnReconnect: true,
-      retry: 1,
+      retry: 2,
     },
   },
 });
@@ -39,7 +39,7 @@ const queryClient = new QueryClient({
 const LoadingFallback = () => (
   <div className="d-flex justify-content-center align-items-center vh-100">
     <div className="spinner-border text-primary" role="status">
-      <span className="visually-hidden">Loading...</span>
+      <span className="visually-hidden">Loading..</span>
     </div>
   </div>
 );

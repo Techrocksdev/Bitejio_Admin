@@ -3,9 +3,20 @@ import { Link } from "react-router-dom";
 import SideBar from "../commonComponents/sideBar";
 import Header from "../commonComponents/header";
 import { useUserAuth } from "../commonComponents/authContext";
+import { useQuery } from "@tanstack/react-query";
+import { getDashboardCounts } from "../apiServices/home/homeHttpService";
 
 function Dashboard() {
   const { isSidebarHidden } = useUserAuth();
+  const { data: count } = useQuery({
+    queryKey: ["getDashboardCount"],
+    queryFn: getDashboardCounts,
+    onError: (error) => {
+      console.log(error);
+    },
+    select: (data) => data.results.data,
+  });
+
   return (
     <>
       <div className="admin-wrapper d-flex">
@@ -30,7 +41,9 @@ function Dashboard() {
                   </div>
                   <div className="text-start">
                     <h6 className="fw-semibold text-muted mb-1">Total Users</h6>
-                    <h4 className="fw-bold text-dark mb-0">1,250</h4>
+                    <h4 className="fw-bold text-dark mb-0">
+                      {count?.userCount || 0}
+                    </h4>
                   </div>
                 </div>
               </div>
@@ -44,7 +57,9 @@ function Dashboard() {
                     <h6 className="fw-semibold text-muted mb-1">
                       Total Merchants
                     </h6>
-                    <h4 className="fw-bold text-dark mb-0">320</h4>
+                    <h4 className="fw-bold text-dark mb-0">
+                      {count?.merchantCount || 0}
+                    </h4>
                   </div>
                 </div>
               </div>
@@ -58,7 +73,9 @@ function Dashboard() {
                     <h6 className="fw-semibold text-muted mb-1">
                       Total Orders
                     </h6>
-                    <h4 className="fw-bold text-dark mb-0">4,850</h4>
+                    <h4 className="fw-bold text-dark mb-0">
+                      {count?.orderCount || 0}
+                    </h4>
                   </div>
                 </div>
               </div>
@@ -72,7 +89,9 @@ function Dashboard() {
                     <h6 className="fw-semibold text-muted mb-1">
                       Total Revenue
                     </h6>
-                    <h4 className="fw-bold text-dark mb-0">₹12.5L</h4>
+                    <h4 className="fw-bold text-dark mb-0">
+                      ₹{count?.revenue || 0}
+                    </h4>
                   </div>
                 </div>
               </div>
