@@ -328,8 +328,8 @@ function Orders() {
                     <strong>Phone:</strong> {details?.userId?.phoneNumber}
                   </p>
                   <p>
-                    <strong>Address:</strong> {details?.userId?.address_line2}{" "}
-                    {details?.userId?.address_line1}
+                    <strong>Address:</strong> {details?.address?.address_line2}{" "}
+                    {details?.address?.address_line1}
                   </p>
                 </div>
                 {/* Merchant Details */}
