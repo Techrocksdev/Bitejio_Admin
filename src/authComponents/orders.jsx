@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import SideBar from "../commonComponents/sideBar";
 import Header from "../commonComponents/header";
@@ -19,7 +19,6 @@ function Orders() {
   const [pageSize, setpageSize] = useState(10);
   const [details, setDetails] = useState({});
 
-  useEffect(() => {}, [details]);
   const {
     data: response,
     isLoading,
@@ -369,7 +368,7 @@ function Orders() {
                     {moment(details.createdAt).format("DD MMM YYYY, hh:mm A")}
                   </p>
                   <p>
-                    <strong>Expected Delivery:</strong> 09 Sep 2025, 8:30 PM
+                    <strong>Expected Delivery:</strong> 1 hour
                   </p>
                 </div>
               </div>
