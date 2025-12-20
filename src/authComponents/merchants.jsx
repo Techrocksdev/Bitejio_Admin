@@ -351,6 +351,9 @@ function Merchants() {
                 <strong>Shop Name:</strong> {details?.shopName}
               </p>
               <p>
+                <strong>Address:</strong> {details?.address}
+              </p>
+              <p>
                 <strong> Phone Number:</strong> {details?.phoneNumber}
               </p>
               <p>

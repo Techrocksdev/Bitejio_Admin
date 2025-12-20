@@ -4,17 +4,20 @@ import SideBar from "../commonComponents/sideBar";
 import Header from "../commonComponents/header";
 import { useUserAuth } from "../commonComponents/authContext";
 import { useQuery } from "@tanstack/react-query";
-import { deleteUser, getOrders } from "../apiServices/home/homeHttpService";
+import {
+  changeOrderStatus,
+  getOrders,
+} from "../apiServices/home/homeHttpService";
 import { showGlobalAlert } from "../commonComponents/useGlobalAlert";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
+import moment from "moment";
 
 function Orders() {
   const { isSidebarHidden } = useUserAuth();
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setpageSize] = useState(10);
   const [details, setDetails] = useState({});
-  const [delId, setDelId] = useState("");
 
   useEffect(() => {}, [details]);
   const {
@@ -29,10 +32,10 @@ function Orders() {
         pageSize: pageSize,
         search: "",
         userId: "",
-        year: 2025,
+        year: 0,
         month: 0,
-        startDate: "2025-12-06",
-        endDate: "2025-12-06",
+        startDate: "",
+        endDate: "",
       };
       return getOrders(formData);
     },
@@ -41,7 +44,7 @@ function Orders() {
     },
   });
 
-  const results = response?.results.orders || [];
+  const results = response?.results?.orders || [];
   const totalPages = Math.ceil(response?.results?.totalPages);
 
   const handlePageChange = (newPage) => {
@@ -50,12 +53,14 @@ function Orders() {
     }
   };
 
-  const deleteOrder = async (id) => {
+  const changeOrderSta = async (id, status) => {
+    const formData = {
+      orderId: id,
+      status: status,
+    };
     try {
-      const response = await deleteUser(id);
+      const response = await changeOrderStatus(formData);
       if (!response.error) {
-        showGlobalAlert(response.message, "success");
-        document.getElementById("close").click();
         refetch();
       } else {
         showGlobalAlert(response.message, "error");
@@ -137,38 +142,46 @@ function Orders() {
                         </tr>
                       ))
                     ) : results?.length ? (
-                      results?.map((item) => (
+                      results?.map((item, index) => (
                         <tr key={item._id}>
-                          <td>1</td>
-                          <td>#ORD1001</td>
-                          <td>Aryan Saini</td>
-                          <td>Pizza Hut</td>
+                          <td>{index + 1}</td>
+                          <td>#{item.orderId}</td>
+                          <td>{item.userId.firstName}</td>
+                          <td>{item?.merchant?.shopName}</td>
                           <td>2x Pizza, 1x Coke</td>
-                          <td>₹550</td>
+                          <td>₹{item.amount}</td>
                           <td>
-                            <select className="form-select form-select-sm status-dropdown">
-                              <option value="pending">Pending</option>
-                              <option value="preparing" selected>
+                            <select
+                              value={item.status}
+                              className="form-select form-select-sm status-dropdown"
+                              onChange={(e) =>
+                                changeOrderSta(item._id, e.target.value)
+                              }
+                            >
+                              <option value="Pending">Pending</option>
+                              <option value="Preparing" selected>
                                 Preparing
                               </option>
-                              <option value="out-for-delivery">
+                              <option value="Out for Delivery">
                                 Out for Delivery
                               </option>
-                              <option value="delivered">Delivered</option>
-                              <option value="cancelled">Cancelled</option>
+                              <option value="Delivered">Delivered</option>
+                              <option value="Cancelled">Cancelled</option>
                             </select>
                           </td>
-                          <td>09 Sep 2025, 7:45 PM</td>
+                          <td>
+                            {moment(item.createdAt).format(
+                              "DD MMM YYYY, hh:mm A"
+                            )}
+                          </td>
                           <td className="text-center">
                             <button
                               className="table-btn bg-main me-2"
                               data-bs-toggle="modal"
                               data-bs-target="#viewOrderModal"
+                              onClick={() => setDetails(item)}
                             >
                               <i className="fa fa-eye" />
-                            </button>
-                            <button className="table-btn bg-danger">
-                              <i className="fa fa-trash" />
                             </button>
                           </td>
                         </tr>
@@ -287,6 +300,7 @@ function Orders() {
         id="viewOrderModal"
         tabIndex={-1}
         aria-hidden="true"
+        data-bs-backdrop="static"
       >
         <div className="modal-dialog modal-dialog-centered modal-lg">
           <div className="modal-content">
@@ -296,6 +310,7 @@ function Orders() {
                 type="button"
                 className="btn-close"
                 data-bs-dismiss="modal"
+                onClick={() => setDetails({})}
               />
             </div>
             <div className="modal-body">
@@ -304,51 +319,54 @@ function Orders() {
                 <div className="col-md-6">
                   <h6 className="fw-bold text-main mb-2">Customer Details</h6>
                   <p>
-                    <strong>Name:</strong> Aryan Saini
+                    <strong>Name:</strong> {details?.userId?.firstName}{" "}
+                    {details?.userId?.lastName}
                   </p>
                   <p>
-                    <strong>Email:</strong> aryan@example.com
+                    <strong>Email:</strong> {details?.userId?.email}
                   </p>
                   <p>
-                    <strong>Phone:</strong> +91 9876543210
+                    <strong>Phone:</strong> {details?.userId?.phoneNumber}
                   </p>
                   <p>
-                    <strong>Address:</strong> Sector 62, Noida, UP
+                    <strong>Address:</strong> {details?.userId?.address_line2}{" "}
+                    {details?.userId?.address_line1}
                   </p>
                 </div>
                 {/* Merchant Details */}
                 <div className="col-md-6">
                   <h6 className="fw-bold text-main mb-2">Merchant Details</h6>
                   <p>
-                    <strong>Shop:</strong> Pizza Hut
+                    <strong>Shop:</strong> {details?.merchant?.shopName}
                   </p>
                   <p>
-                    <strong>Contact:</strong> +91 9998887777
+                    <strong>Contact:</strong> {details?.merchant?.phoneNumber}
                   </p>
                   <p>
-                    <strong>Location:</strong> GIP Mall, Noida
+                    <strong>Location:</strong> {details?.merchant?.address}
                   </p>
                 </div>
                 {/* Order Details */}
                 <div className="col-12">
                   <h6 className="fw-bold text-main mb-2">Order Information</h6>
                   <p>
-                    <strong>Order ID:</strong> #ORD1001
+                    <strong>Order ID:</strong> #{details?.orderId}
                   </p>
                   <p>
                     <strong>Items:</strong> 2x Pizza, 1x Coke
                   </p>
                   <p>
-                    <strong>Total Amount:</strong> ₹550
+                    <strong>Total Amount:</strong> ₹{details?.amount}
                   </p>
                   <p>
                     <strong>Payment Method:</strong> UPI
                   </p>
                   <p>
-                    <strong>Status:</strong> Preparing
+                    <strong>Status:</strong> {details?.status}
                   </p>
                   <p>
-                    <strong>Placed At:</strong> 09 Sep 2025, 7:45 PM
+                    <strong>Placed At:</strong>{" "}
+                    {moment(details.createdAt).format("DD MMM YYYY, hh:mm A")}
                   </p>
                   <p>
                     <strong>Expected Delivery:</strong> 09 Sep 2025, 8:30 PM
@@ -357,50 +375,13 @@ function Orders() {
               </div>
             </div>
             <div className="modal-footer">
-              <button className="btn comman-btn-main" data-bs-dismiss="modal">
+              <button
+                className="btn comman-btn-main"
+                onClick={() => setDetails({})}
+                data-bs-dismiss="modal"
+              >
                 Close
               </button>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div
-        className="modal fade logoutmodal"
-        id="delete"
-        tabIndex={-1}
-        aria-labelledby="exampleModalLabel"
-        aria-hidden="true"
-      >
-        <div className="modal-dialog modal-dialog-centered">
-          <div className="modal-content">
-            <div className="modal-body">
-              <div className="paymentmodal_main text-center">
-                <div className="payment_head mb-3 mt-1">
-                  <h2>Confirmation</h2>
-                  <p>Are you sure you want to delete this order?</p>
-                </div>
-                <div className="row justify-content-center mb-2">
-                  <div className="col-auto">
-                    <button
-                      className="comman-btn-main"
-                      onClick={() => deleteUser(delId)}
-                    >
-                      Yes
-                    </button>
-                  </div>
-                  <div className="col-auto">
-                    <Link
-                      className="comman-btn-main white"
-                      data-bs-dismiss="modal"
-                      to=""
-                      onClick={() => setDelId("")}
-                      id="close"
-                    >
-                      No
-                    </Link>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         </div>

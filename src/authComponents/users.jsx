@@ -12,6 +12,7 @@ import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { showGlobalAlert } from "../commonComponents/useGlobalAlert";
 import { Link } from "react-router-dom";
+import moment from "moment";
 
 function Users() {
   const { isSidebarHidden } = useUserAuth();
@@ -116,7 +117,6 @@ function Users() {
                       <th>Email</th>
                       <th>Phone Number</th>
                       <th>DOB</th>
-                      <th>Role</th>
                       <th>Status</th>
                       <th className="text-center">Actions</th>
                     </tr>
@@ -125,9 +125,6 @@ function Users() {
                     {isLoading ? (
                       [...Array(pageSize)].map((_, index) => (
                         <tr key={index}>
-                          <td>
-                            <Skeleton />
-                          </td>
                           <td>
                             <Skeleton />
                           </td>
@@ -162,8 +159,9 @@ function Users() {
                           <td>{item.lastName || "N/A"}</td>
                           <td>{item.email || "N/A"}</td>
                           <td>{item.phoneNumber || "N/A"}</td>
-                          <td>{item.dob || "N/A"}</td>
-                          <td>{item.userType || "N/A"}</td>
+                          <td>
+                            {moment(item.dob).format("DD MMM YYYY") || "N/A"}
+                          </td>
                           <td>
                             <div className="form-check form-switch">
                               <input

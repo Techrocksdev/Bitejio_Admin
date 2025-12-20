@@ -39,6 +39,7 @@ function AddMerchant({ details, setDetails, refetch, setCurrentPage }) {
       setValue("lastName", details?.lastName);
       setValue("userName", details?.name);
       setValue("shopName", details?.shopName);
+      setValue("address", details?.address);
       setValue("email", details?.email);
       if (details?.phoneNumber) {
         const phoneNumber = details?.phoneNumber.replace(/^\+/, "");
@@ -188,7 +189,6 @@ function AddMerchant({ details, setDetails, refetch, setCurrentPage }) {
                     value: 30,
                     message: "Username must be less than 30 characters",
                   },
-                  
                 })}
               />
               {errors.userName && (
@@ -255,7 +255,7 @@ function AddMerchant({ details, setDetails, refetch, setCurrentPage }) {
                 rules={{ required: "Phone number is required" }}
                 render={({ field }) => (
                   <PhoneInput
-                    country={"us"}
+                    country={"in"}
                     inputClass={`form-control ${
                       errors.phoneNumber ? "input-error" : ""
                     }`}
@@ -284,6 +284,35 @@ function AddMerchant({ details, setDetails, refetch, setCurrentPage }) {
               {errors.phoneNumber && (
                 <p className="form-error">{errors.phoneNumber.message}</p>
               )}
+            </div>
+            <div className="col-md-6">
+              <label className="form-label fw-semibold">
+                Address <span className="text-danger">*</span>
+              </label>
+              <input
+                type="text"
+                className={`form-control ${
+                  errors.address ? "input-error" : ""
+                }`}
+                placeholder="Enter address"
+                {...register("address", {
+                  required: "Address is required",
+                })}
+              />
+              {errors.address && (
+                <p className="form-error">{errors.address.message}</p>
+              )}
+            </div>
+            <div className="col-md-6 d-flex align-items-center">
+              <label className="form-label fw-semibold me-3">Status</label>
+              <div className="form-check form-switch">
+                <input
+                  className="form-check-input"
+                  type="checkbox"
+                  defaultChecked={details?.firstName ? "" : true}
+                  {...register("status")}
+                />
+              </div>
             </div>
             {details?.firstName ? (
               ""
@@ -359,18 +388,6 @@ function AddMerchant({ details, setDetails, refetch, setCurrentPage }) {
                 </div>
               </>
             )}
-
-            <div className="col-md-6 d-flex align-items-center">
-              <label className="form-label fw-semibold me-3">Status</label>
-              <div className="form-check form-switch">
-                <input
-                  className="form-check-input"
-                  type="checkbox"
-                  defaultChecked={details?.firstName ? "" : true}
-                  {...register("status")}
-                />
-              </div>
-            </div>
           </div>
           <div className="modal-footer">
             <button
